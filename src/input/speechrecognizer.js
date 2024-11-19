@@ -1,5 +1,5 @@
-import '../examples/lib/cryptojs.js';
-import { guid } from "./utils.js";
+import '../lib/cryptojs';
+import { guid } from "../utils.js";
 
 // 识别需要过滤的参数
 const needFiltrationParams = ['appid', 'secretkey', 'signCallback'];
@@ -48,7 +48,7 @@ async function createQuery(query) {
 
     const tempQuery = { ...query };
     for (let i = 0, len = needFiltrationParams.length; i < len; i++) {
-        if (tempQuery.hasOwnProperty(needFiltrationParams[i])) {
+        if (Object.prototype.hasOwnProperty.call(tempQuery, needFiltrationParams[i])) {
             delete tempQuery[needFiltrationParams[i]];
         }
     }
@@ -166,6 +166,8 @@ export class SpeechRecognizer {
         if ('WebSocket' in window) {
             this.socket = new WebSocket(url);
         } else if ('MozWebSocket' in window) {
+            // do not check eslint for deprecated api
+            // eslint-disable-next-line
             this.socket = new MozWebSocket(url);
         } else {
             this.isLog && console.log(this.requestId, '浏览器不支持WebSocket', TAG);

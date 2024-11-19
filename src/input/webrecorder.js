@@ -160,6 +160,7 @@ export default class WebRecorder {
         // // for DEBUG
         // let devices = await WebRecorder.getDevices();
         // deviceId = devices[7].deviceId;
+        console.log('using deviceId = ' + deviceId);
         if (deviceId) {
             mediaOption.audio = {
                 deviceId: { exact: deviceId }

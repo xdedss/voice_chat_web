@@ -30,7 +30,7 @@ export function extractStandardParams(object, paramsDefs) {
         if (entry.required) {
             if (objVal === undefined) {
                 // requirement not satisfied
-                throw '[extractStandardParams] can not find required entry: ' + entry.id + ' from ' + object;
+                throw '[extractStandardParams] can not find required entry: ' + entry.id + ' from ' + JSON.stringify(object);
             }
         }
         else {

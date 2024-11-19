@@ -18,6 +18,8 @@
 
 start后，监听输入，发送一句话开始/部分/结束事件
 
+提供deviceId字段以便切换麦克风
+
 ### ChatProvider
 
 start后，接收到feedInput则加入chat history并开始请求回复

@@ -1,6 +1,6 @@
 import WebRecorder from "./webrecorder.js";
 import { SpeechRecognizer } from "./speechrecognizer.js";
-import { extractStandardParams, guid, mapParamNames, PARAM_TYPES, removePrefix } from "../utils.js";
+import { extractStandardParams, guid, mapParamNames, PARAM_TYPES, removePrefix, pop_dict } from "../utils.js";
 
 // start之后支持以下回调:
 // // 开始说话时
@@ -91,6 +91,7 @@ export default class InputProviderTencent {
         
         this.recorder = null;
         this.speechRecognizer = null;
+        this.deviceId = 'default';
         
         // settings
         // ends ASR a sentence after this many miliseconds of slience
@@ -117,6 +118,7 @@ export default class InputProviderTencent {
         this.recorder.OnReceivedData = (data) => {
             // console.log('sendToRecognizer', this.isRecognizerRunning);
             if (this.isRecognizerRunning) {
+                // console.log(data);
                 this.speechRecognizer && this.speechRecognizer.write(data);
             }
         };
@@ -150,19 +152,23 @@ export default class InputProviderTencent {
             if (res.result.voice_text_str.length > 0) {
                 if (this.timeSinceLastRecognition < 0) {
                     // this is the first valid string recognized
-                    this.OnValidRecognitionBegin(res);
+                    this.logEnabled && console.log('[InputManager] OnValidRecognitionBegin');
+                    this.OnValidRecognitionBegin();
                     this.isUserSpeaking = true;
                 }
                 // start timeout when valid string is received
                 this.timeSinceLastRecognition = 0;
+                
+                this.logEnabled && console.log('[InputManager] OnRecognitionResultChange ' + res.result.voice_text_str);
+                this.OnRecognitionResultChange(res.result.voice_text_str);
             }
-            this.OnRecognitionResultChange(res);
         };
         // 一句话结束
         this.speechRecognizer.OnSentenceEnd = (res) => {
             if (this.isUserSpeaking) {
                 this.isUserSpeaking = false;
-                this.OnSentenceEnd(res);
+                this.logEnabled && console.log('[InputManager] OnSentenceEnd ' + res.result.voice_text_str);
+                this.OnSentenceEnd(res.result.voice_text_str);
             }
         };
         // 识别结束
@@ -177,7 +183,7 @@ export default class InputProviderTencent {
             if (this.speechRecognizer && !this.isNormalEndStop) {
                 this.OnError(res);
             }
-            this.speechRecognizer = null;
+            // this.speechRecognizer = null;
             this.recorder && this.recorder.stop();
             this.isRecognizerRunning = false;
         };
@@ -196,7 +202,7 @@ export default class InputProviderTencent {
             }
             setTimeout(timeoutFunc, this.updateInterval);
 
-            await this.recorder.start();
+            await this.recorder.start(this.deviceId);
             this.logEnabled && console.log('[InputManager] recorder started');
             await this.speechRecognizer.start();
             this.logEnabled && console.log('[InputManager] recognizer started');
@@ -243,7 +249,7 @@ export default class InputProviderTencent {
     // 一句话开始的时候
     // OnSentenceBegin(res) { }
     // 开始识别到一句话的有效内容
-    OnValidRecognitionBegin(res) { }
+    OnValidRecognitionBegin() { }
     // 识别结果发生变化的时候
     OnRecognitionResultChange(res) { }
     // 一句话结束的时候
