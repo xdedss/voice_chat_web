@@ -1,0 +1,31 @@
+{
+  "name": "voice_chat_web",
+  "version": "1.0.0",
+  "description": "1. InputProvider\r    - onSentenceBegin\r    - onSentencePartialComplete\r    - onSentenceComplete\r    - onError\r 2. ChatProvider\r    - feedInput(text)\r    - confirmOutput(text)\r    - interrupt()\r    - onChatResponse\r 3. OutputProvider\r    - feedInput(text)\r    - onConfirmOutput",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xdedss/voice_chat_web.git"
+  },
+  "author": "xdedss",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/xdedss/voice_chat_web/issues"
+  },
+  "homepage": "https://github.com/xdedss/voice_chat_web#readme",
+  "dependencies": {
+    "lodash": "^4.17.21",
+    "openai": "^4.72.0",
+    "store2": "^2.14.3"
+  },
+  "devDependencies": {
+    "@rollup/plugin-json": "^6.1.0",
+    "@rollup/plugin-node-resolve": "^15.3.0",
+    "rollup": "^2.79.2",
+    "rollup-plugin-polyfill-node": "^0.13.0",
+    "rollup-plugin-terser": "^7.0.2"
+  }
+}
