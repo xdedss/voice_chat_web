@@ -156,6 +156,8 @@ export class SpeechRecognizer {
 
         this.socket = null;
         this.getMessageList = [];
+        this.isLog && console.log('[speech recognizer]query: ');
+        this.isLog && console.log(this.query);
         const url = await getUrl(this, this.query);
         if (!url) {
             this.isLog && console.log(this.requestId, '鉴权失败', TAG);

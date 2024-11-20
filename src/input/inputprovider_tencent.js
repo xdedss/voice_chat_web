@@ -4,11 +4,11 @@ import { extractStandardParams, guid, mapParamNames, PARAM_TYPES, removePrefix, 
 
 // start之后支持以下回调:
 // // 开始说话时
-// OnValidRecognitionBegin(res) { }
+// onSentenceBegin(res) { }
 // // 识别结果发生变化的时候
-// OnRecognitionResultChange(res) { }
+// onSentencePartialComplete(res) { }
 // // 一句话结束的时候
-// OnSentenceEnd(res) { }
+// onSentenceComplete(res) { }
 // 对外可能有用的变量：
 // isUserSpeaking
 export default class InputProviderTencent {
@@ -48,6 +48,11 @@ export default class InputProviderTencent {
             {
                 id: 'tencent_asr_hotword_id',
                 type: PARAM_TYPES.STRING,
+                required: false,
+            },
+            {
+                id: 'tencent_asr_needvad',
+                type: PARAM_TYPES.INT,
                 required: false,
             },
             {
@@ -152,23 +157,24 @@ export default class InputProviderTencent {
             if (res.result.voice_text_str.length > 0) {
                 if (this.timeSinceLastRecognition < 0) {
                     // this is the first valid string recognized
-                    this.logEnabled && console.log('[InputManager] OnValidRecognitionBegin');
-                    this.OnValidRecognitionBegin();
+                    this.logEnabled && console.log('[InputManager] onSentenceBegin');
+                    this.onSentenceBegin();
                     this.isUserSpeaking = true;
                 }
                 // start timeout when valid string is received
                 this.timeSinceLastRecognition = 0;
                 
-                this.logEnabled && console.log('[InputManager] OnRecognitionResultChange ' + res.result.voice_text_str);
-                this.OnRecognitionResultChange(res.result.voice_text_str);
+                this.logEnabled && console.log('[InputManager] onSentencePartialComplete ' + res.result.voice_text_str);
+                this.onSentencePartialComplete(res.result.voice_text_str);
             }
         };
         // 一句话结束
         this.speechRecognizer.OnSentenceEnd = (res) => {
             if (this.isUserSpeaking) {
                 this.isUserSpeaking = false;
-                this.logEnabled && console.log('[InputManager] OnSentenceEnd ' + res.result.voice_text_str);
-                this.OnSentenceEnd(res.result.voice_text_str);
+                this.timeSinceLastRecognition = -1;
+                this.logEnabled && console.log('[InputManager] onSentenceComplete ' + res.result.voice_text_str);
+                this.onSentenceComplete(res.result.voice_text_str);
             }
         };
         // 识别结束
@@ -231,11 +237,11 @@ export default class InputProviderTencent {
             // console.log('timeSinceLastRecognition', this.timeSinceLastRecognition);
         }
         if (this.timeSinceLastRecognition >= this.splitRecognitionThreshold) {
-            this.logEnabled && console.log('[InputManager] [recognition eos]');
-            this.timeSinceLastRecognition = -1;
-            // interrupt and then restart.
-            // this will trigger a OnRecognitionComplete eventually
-            this.speechRecognizer.stop().then(() => this.speechRecognizer.start());
+            // this.logEnabled && console.log('[InputManager] [recognition eos]');
+            // this.timeSinceLastRecognition = -1;
+            // // interrupt and then restart.
+            // // this will trigger a OnRecognitionComplete eventually
+            // this.speechRecognizer.stop().then(() => this.speechRecognizer.start());
         }
     }
     // destroyStream() {
@@ -249,11 +255,11 @@ export default class InputProviderTencent {
     // 一句话开始的时候
     // OnSentenceBegin(res) { }
     // 开始识别到一句话的有效内容
-    OnValidRecognitionBegin() { }
+    onSentenceBegin() { }
     // 识别结果发生变化的时候
-    OnRecognitionResultChange(res) { }
+    onSentencePartialComplete(res) { }
     // 一句话结束的时候
-    OnSentenceEnd(res) { }
+    onSentenceComplete(res) { }
     // 识别结束的时候
     // OnRecognitionComplete(res) { }
     // 识别失败

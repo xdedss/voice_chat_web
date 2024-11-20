@@ -10,6 +10,7 @@
    - confirmOutput(text)
    - interrupt()
    - onChatResponse
+   - onError
 3. OutputProvider
    - feedInput(text)
    - onConfirmOutput
