@@ -157,14 +157,14 @@ export default class InputProviderTencent {
             if (res.result.voice_text_str.length > 0) {
                 if (this.timeSinceLastRecognition < 0) {
                     // this is the first valid string recognized
-                    this.logEnabled && console.log('[InputManager] onSentenceBegin');
+                    this.logEnabled && console.log('[InputProvider] onSentenceBegin');
                     this.onSentenceBegin();
                     this.isUserSpeaking = true;
                 }
                 // start timeout when valid string is received
                 this.timeSinceLastRecognition = 0;
                 
-                this.logEnabled && console.log('[InputManager] onSentencePartialComplete ' + res.result.voice_text_str);
+                this.logEnabled && console.log('[InputProvider] onSentencePartialComplete ' + res.result.voice_text_str);
                 this.onSentencePartialComplete(res.result.voice_text_str);
             }
         };
@@ -173,13 +173,13 @@ export default class InputProviderTencent {
             if (this.isUserSpeaking) {
                 this.isUserSpeaking = false;
                 this.timeSinceLastRecognition = -1;
-                this.logEnabled && console.log('[InputManager] onSentenceComplete ' + res.result.voice_text_str);
+                this.logEnabled && console.log('[InputProvider] onSentenceComplete ' + res.result.voice_text_str);
                 this.onSentenceComplete(res.result.voice_text_str);
             }
         };
         // 识别结束
         this.speechRecognizer.OnRecognitionComplete = (res) => {
-            console.log('[InputManager] setting to false sendToRecognizer');
+            console.log('[InputProvider] setting to false sendToRecognizer');
             this.isRecognizerRunning = false;
             // this.OnRecognitionComplete(res);
             this.isNormalEndStop = true; // not sure if this is necessary
@@ -196,7 +196,7 @@ export default class InputProviderTencent {
     }
     async start() {
         try {
-            this.logEnabled && console.log('[InputManager] start function is called');
+            this.logEnabled && console.log('[InputProvider] start function is called');
             // update
             let that = this;
             this.isRunning = true;
@@ -209,23 +209,23 @@ export default class InputProviderTencent {
             setTimeout(timeoutFunc, this.updateInterval);
 
             await this.recorder.start(this.deviceId);
-            this.logEnabled && console.log('[InputManager] recorder started');
+            this.logEnabled && console.log('[InputProvider] recorder started');
             await this.speechRecognizer.start();
-            this.logEnabled && console.log('[InputManager] recognizer started');
+            this.logEnabled && console.log('[InputProvider] recognizer started');
         } catch (e) {
             console.log(e);
             throw e;
         }
     }
     async stop() {
-        this.logEnabled && console.log('[InputManager] stop function is called');
+        this.logEnabled && console.log('[InputProvider] stop function is called');
         if (this.speechRecognizer) {
             await this.speechRecognizer.stop();
-            this.logEnabled && console.log('[InputManager] recognizer stopped');
+            this.logEnabled && console.log('[InputProvider] recognizer stopped');
         }
         if (this.recorder) {
             await this.recorder.stop();
-            this.logEnabled && console.log('[InputManager] recorder stopped');
+            this.logEnabled && console.log('[InputProvider] recorder stopped');
         }
         // this will stop the animation loop
         this.isRunning = false;
@@ -237,7 +237,7 @@ export default class InputProviderTencent {
             // console.log('timeSinceLastRecognition', this.timeSinceLastRecognition);
         }
         if (this.timeSinceLastRecognition >= this.splitRecognitionThreshold) {
-            // this.logEnabled && console.log('[InputManager] [recognition eos]');
+            // this.logEnabled && console.log('[InputProvider] [recognition eos]');
             // this.timeSinceLastRecognition = -1;
             // // interrupt and then restart.
             // // this will trigger a OnRecognitionComplete eventually

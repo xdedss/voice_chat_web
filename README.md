@@ -13,7 +13,9 @@
    - onError
 3. OutputProvider
    - feedInput(text)
+   - interrupt()
    - onConfirmOutput
+   - onError
 
 ### InputProvider
 

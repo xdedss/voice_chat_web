@@ -58,9 +58,9 @@ async function refreshDevices() {
         audioDevices.value.push(option);
       }
     });
-    if (devices.length > 7) {
-      selectedDeviceId.value = devices[7].deviceId;
-    }
+    // if (devices.length > 7) {
+    //   selectedDeviceId.value = devices[7].deviceId;
+    // }
   } catch (error) {
     console.error('Error getting audio devices:', error);
     alert('Error getting audio devices:' + error);
@@ -97,6 +97,7 @@ function clear() {
         <n-select v-model:value="selectedDeviceId" :options="audioDevices" />
       </n-flex>
       <n-flex vertical>
+        <n-text>Results:</n-text>
         <n-list hoverable clickable>
           <n-list-item v-for="t in textIdentified" :key="t.key">
             <n-text :type="t.finished ? '' : 'primary'">{{t.text}}</n-text>

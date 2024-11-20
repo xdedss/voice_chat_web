@@ -84,19 +84,19 @@ export class ChatProviderOpenai {
     }
     // 暂停识别，关闭连接
     async stop() {
-        this.logEnabled && console.log('[ChagAgent] stop called');
+        this.logEnabled && console.log('[ChatProvider] stop called');
         this.isRunning = false; // tell the worker to stop;
         let rejectFunc = this.stopPromiseReject;
-        setTimeout(() => rejectFunc && rejectFunc('[ChatAgent] wait for stop: timed out'), 5000);
+        setTimeout(() => rejectFunc && rejectFunc('[ChatProvider] wait for stop: timed out'), 5000);
         await this.stopPromise;
         this.isStreamingResponse = false;
 
     }
     // 
     async start() {
-        this.logEnabled && console.log('[ChagAgent] start called');
+        this.logEnabled && console.log('[ChatProvider] start called');
         if (this.isRunning) {
-            this.logEnabled && console.log('[ChagAgent] is already running');
+            this.logEnabled && console.log('[ChatProvider] is already running');
             return;
         }
         this.isRunning = true;
@@ -113,13 +113,13 @@ export class ChatProviderOpenai {
         this.worker();
     }
     async worker() {
-        this.logEnabled && console.log('[ChagAgent] worker begin');
+        this.logEnabled && console.log('[ChatProvider] worker begin');
         while (this.isRunning) {
             await sleep(this.workerInterval);
 
             if (this.getLastRole() == 'user') {
                 // generate respose for the user
-                this.logEnabled && console.log('[ChagAgent] worker start to process user request', JSON.parse(JSON.stringify(this.chatHisotry)));
+                this.logEnabled && console.log('[ChatProvider] worker start to process user request', JSON.parse(JSON.stringify(this.chatHisotry)));
                 const timerStart = new Date().getTime() / 1000;
                 let timerEnd = 0;
                 const stream = await this.client.chat.completions.create({
@@ -139,15 +139,15 @@ export class ChatProviderOpenai {
                     const origLen = cumulativeText.length;
                     if (this.logEnabled && timerEnd == 0 && chunkText) {
                         timerEnd = new Date().getTime() / 1000;
-                        console.log('[chat agent] first token took', timerEnd - timerStart);
+                        console.log('[ChatProvider] first token took', timerEnd - timerStart);
                     }
                     cumulativeText += chunkText;
                     cumulativeText = cumulativeText.trimStart(); // always trim to avoid whitespaces
-                    this.logEnabled && console.log('[ChatAgent] stream:', new Date().getTime() / 1000 - timerStart, cumulativeText);
+                    this.logEnabled && console.log('[ChatProvider] stream:', new Date().getTime() / 1000 - timerStart, cumulativeText);
 
                     const splitPos = findStreamSplit(cumulativeText, origLen);
                     if (splitPos >= 0) {
-                        this.logEnabled && console.log('[ChatAgent] split at position', splitPos);
+                        this.logEnabled && console.log('[ChatProvider] split at position', splitPos);
                         this.sendResponse(cumulativeText.slice(0, splitPos));
                         cumulativeText = cumulativeText.slice(splitPos).trimStart();
                     }
@@ -166,13 +166,13 @@ export class ChatProviderOpenai {
 
         }
         this.stopPromiseResolve && this.stopPromiseResolve();
-        this.logEnabled && console.log('[ChagAgent] worker end');
+        this.logEnabled && console.log('[ChatProvider] worker end');
     }
     getLastRole() {
         return this.chatHisotry[this.chatHisotry.length - 1].role;
     }
     sendResponse(msg) {
-        this.logEnabled && console.log('[ChatAgent] response: ', msg);
+        this.logEnabled && console.log('[ChatProvider] response: ', msg);
         this.onChatResponse(msg);
     }
 

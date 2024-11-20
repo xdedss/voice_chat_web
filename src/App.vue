@@ -10,8 +10,11 @@
                 <n-menu :inverted="inverted" :collapsed-width="64" :collapsed-icon-size="22" :options="menuOptions" />
             </n-layout-sider>
             <n-layout :native-scrollbar="false" content-style="padding: 0 .5rem;">
-                <input-test></input-test>
-                <chat-test></chat-test>
+                <n-flex>
+                    <input-test></input-test>
+                    <chat-test></chat-test>
+                    <output-test></output-test>
+                </n-flex>
             </n-layout>
         </n-layout>
         <n-layout-footer :inverted="inverted" bordered>
@@ -30,6 +33,7 @@ import {
 } from "@vicons/ionicons5";
 import InputTest from "./test/InputTest.vue";
 import ChatTest from "./test/ChatTest.vue";
+import OutputTest from "./test/OutputTest.vue";
 
 function renderIcon(icon) {
     return () => h(NIcon, null, { default: () => h(icon) });

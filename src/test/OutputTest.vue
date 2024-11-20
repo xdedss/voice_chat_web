@@ -2,79 +2,61 @@
 import { NCard, NButton, NText, NSelect, NList, NListItem, NFlex, NInput, NInputGroup } from 'naive-ui';
 import { ref } from 'vue';
 import { guid } from '@/utils';
-import { ChatProviderOpenai } from '@/chat/chatprovider_openai';
+import OutputProviderTencent from '@/output/outputprovider_tencent';
 
 const inputText = ref('');
 
 const params = {
-  openai_key: window.debugSecrets.openai_key,
-  openai_base: window.debugSecrets.openai_base,
-  openai_model: window.debugSecrets.openai_model,
+  tencent_secretid: window.debugSecrets.secretId,
+  tencent_secretkey: window.debugSecrets.secretKey,
+  tencent_appid: window.debugSecrets.appId,
 };
-const chatProvider = new ChatProviderOpenai(params);
-const chatLog = ref([]);
+const outputProvider = new OutputProviderTencent(params);
+const confirmedOutput = ref('');
 const btnState = ref(0);
 
-chatProvider.onChatResponse = msg => {
-  chatLog.value.push({
-    'role': 'assistant',
-    'text': msg,
-    'key': guid(),
-  });
+outputProvider.onConfirmOutput = msg => {
+    confirmedOutput.value += msg;
 };
 
 function clear() {
-  chatLog.value = [];
-  chatLog.value.push({
-    'role': 'system',
-    'text': chatProvider.systemPrompt,
-    'key': guid(),
-  });
+    confirmedOutput.value = '';
 }
-clear();
 
 async function start() {
   btnState.value = -1;
-  await chatProvider.start();
+  await outputProvider.start();
   btnState.value = 1;
 }
 
 async function stop() {
   btnState.value = -1;
-  await chatProvider.stop();
+  await outputProvider.stop();
   btnState.value = 0;
 }
 
 function feedInput() {
   const msg = inputText.value;
   inputText.value = '';
-  chatLog.value.push({
-    'role': 'user',
-    'text': msg,
-    'key': guid(),
-  });
-  chatProvider.feedInput(msg);
+  outputProvider.feedInput(msg);
 }
 
 function interrupt() {
-  chatProvider.interrupt();
+  outputProvider.interrupt();
 }
 
 
 </script>
 
 <template>
-  <n-card title="ChatProvider测试">
+  <n-card title="OutputProvider测试">
     <!-- <template #header-extra>
       #header-extra
     </template> -->
     <n-flex vertical>
       <n-flex vertical>
-        <n-list hoverable clickable>
-          <n-list-item v-for="t in chatLog" :key="t.key">
-            <n-text>{{ t.role }}: {{ t.text }}</n-text>
-          </n-list-item>
-        </n-list>
+        <n-text>Confirmed Output:</n-text>
+        <n-text>{{ confirmedOutput }}</n-text>
       </n-flex>
       <n-flex>
         <n-input-group>
