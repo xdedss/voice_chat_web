@@ -91,6 +91,7 @@ export const guid = () => {
 
 export const PARAM_TYPES = {
     INT: 'int',
+    FLOAT: 'float',
     STRING: 'string',
     BOOL: 'bool',
     ENUM: 'enum',

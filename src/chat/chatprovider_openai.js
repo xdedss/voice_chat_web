@@ -99,7 +99,6 @@ export class ChatProviderOpenai {
             this.logEnabled && console.log('[ChatProvider] is already running');
             return;
         }
-        this.isRunning = true;
         this.isStreamingResponse = false;
         this.stopPromiseResolve = null;
         this.stopPromiseReject = null;
@@ -110,7 +109,14 @@ export class ChatProviderOpenai {
         // reset state
         this.chatHisotry = [{ role: 'system', content: this.systemPrompt }];
         // start async func but do not wait
-        this.worker();
+        try {
+            this.isRunning = true;
+            this.worker();
+        } catch (e) {
+            console.log(e);
+            this.onError(e);
+            throw e;
+        }
     }
     async worker() {
         this.logEnabled && console.log('[ChatProvider] worker begin');
@@ -211,4 +217,5 @@ export class ChatProviderOpenai {
     }
 
     onChatResponse(msg) { }
+    onError(e) { }
 }
