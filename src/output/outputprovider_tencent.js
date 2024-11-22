@@ -2,6 +2,8 @@ import '../lib/cryptojs';
 import { extractStandardParams, guid, mapParamNames, PARAM_TYPES, removePrefix, pop_dict, sleep } from "../utils.js";
 import { OpusDecoder } from 'opus-decoder';
 
+// https://cloud.tencent.com/document/product/1073/94308
+
 function formatSignString(params) {
     let strParam = "";
     let signStr = "GETtts.cloud.tencent.com/stream_ws";
@@ -186,21 +188,25 @@ export default class OutputProviderTencent {
                 id: 'tencent_tts_voice_type',
                 type: PARAM_TYPES.INT,
                 required: false,
+                // https://cloud.tencent.com/document/product/1073/92668
             },
             {
                 id: 'tencent_tts_volume',
                 type: PARAM_TYPES.FLOAT,
                 required: false,
+                // [-10，10]
             },
             {
                 id: 'tencent_tts_speed',
                 type: PARAM_TYPES.FLOAT,
                 required: false,
+                // -2, -1, 0, 1, 2, 6
             },
             {
                 id: 'tencent_tts_sample_rate',
                 type: PARAM_TYPES.INT,
                 required: false,
+                // 8000, 16000(default), 24000
             },
         ]
     }

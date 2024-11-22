@@ -2,6 +2,8 @@ import WebRecorder from "./webrecorder.js";
 import { SpeechRecognizer } from "./speechrecognizer.js";
 import { extractStandardParams, guid, mapParamNames, PARAM_TYPES, removePrefix, pop_dict } from "../utils.js";
 
+// https://cloud.tencent.com/document/product/1093/48982
+
 // start之后支持以下回调:
 // // 开始说话时
 // onSentenceBegin(res) { }

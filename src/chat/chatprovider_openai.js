@@ -21,7 +21,7 @@ function findStreamSplit(existingString, start_i) {
     return -1;
 }
 
-export class ChatProviderOpenai {
+export default class ChatProviderOpenai {
 
     // OPENAI EXAMPLE:
     // const client = new OpenAI();

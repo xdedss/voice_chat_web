@@ -2,7 +2,7 @@
 import { NCard, NButton, NText, NSelect, NList, NListItem, NFlex, NInput, NInputGroup } from 'naive-ui';
 import { ref } from 'vue';
 import { guid } from '@/utils';
-import { ChatProviderOpenai } from '@/chat/chatprovider_openai';
+import ChatProviderOpenai from '@/chat/chatprovider_openai';
 
 const inputText = ref('');
 
@@ -78,7 +78,7 @@ function interrupt() {
       </n-flex>
       <n-flex>
         <n-input-group>
-          <n-input v-model:value="inputText" type="text" placeholder="Message..."  @keyup.enter="feedInput()" />
+          <n-input v-model:value="inputText" type="text" placeholder="Message..." @keyup.enter="feedInput()" />
           <n-button v-on:click="feedInput()">Feed Input</n-button>
           <n-button secondary type="warning" v-on:click="interrupt()">Interrupt</n-button>
         </n-input-group>

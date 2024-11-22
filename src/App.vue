@@ -14,6 +14,7 @@
                     <input-test></input-test>
                     <chat-test></chat-test>
                     <output-test></output-test>
+                    <full-test></full-test>
                 </n-flex>
             </n-layout>
         </n-layout>
@@ -34,6 +35,7 @@ import {
 import InputTest from "./test/InputTest.vue";
 import ChatTest from "./test/ChatTest.vue";
 import OutputTest from "./test/OutputTest.vue";
+import FullTest from "./test/FullTest.vue";
 
 function renderIcon(icon) {
     return () => h(NIcon, null, { default: () => h(icon) });
