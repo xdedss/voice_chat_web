@@ -1,5 +1,5 @@
 <script setup>
-import { NCard, NButton, NText, NSelect, NList, NListItem, NFlex, NInput, NInputGroup } from 'naive-ui';
+import { NCard, NButton, NText, NTag, NFlex, NInput, NInputGroup } from 'naive-ui';
 import { ref } from 'vue';
 import { guid } from '@/utils';
 import OutputProviderTencent from '@/output/outputprovider_tencent';
@@ -14,15 +14,18 @@ const params = {
     tencent_tts_voice_type: 1002,
 };
 const outputProvider = new OutputProviderTencent(params);
-const confirmedOutput = ref('');
+const confirmedOutput = ref([]);
 const btnState = ref(0);
 
 outputProvider.onConfirmOutput = msg => {
-    confirmedOutput.value += msg;
+    confirmedOutput.value.push({
+        key: guid(),
+        text: msg,
+    });
 };
 
 function clear() {
-    confirmedOutput.value = '';
+    confirmedOutput.value = [];
 }
 
 async function start() {
@@ -58,7 +61,9 @@ function interrupt() {
         <n-flex vertical>
             <n-flex vertical>
                 <n-text>Confirmed Output:</n-text>
-                <n-text>{{ confirmedOutput }}</n-text>
+                <n-flex>
+                    <n-tag v-for="item in confirmedOutput" :key="item.key">{{ item.text }}</n-tag>
+                </n-flex>
             </n-flex>
             <n-flex>
                 <n-input-group>

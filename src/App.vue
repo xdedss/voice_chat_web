@@ -7,7 +7,7 @@
         <n-layout has-sider style="flex:1">
             <n-layout-sider bordered show-trigger collapse-mode="width" :collapsed-width="64" :width="240"
                 :native-scrollbar="false" :inverted="inverted" style="">
-                <n-menu :inverted="inverted" :collapsed-width="64" :collapsed-icon-size="22" :options="menuOptions" />
+                <n-menu :inverted="inverted" :collapsed-width="64" :collapsed-icon-size="22" :options="menuOptions" @update:value="sideMenuUpdate"/>
             </n-layout-sider>
             <n-layout :native-scrollbar="false" content-style="padding: 0 .5rem;">
                 <n-flex>
@@ -42,6 +42,10 @@ function renderIcon(icon) {
 }
 
 const inverted = ref(false);
+
+function sideMenuUpdate(key, item) {
+    console.log(key, item);
+}
 
 const menuOptions = [
     {

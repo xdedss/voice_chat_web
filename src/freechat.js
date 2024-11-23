@@ -41,6 +41,13 @@ export default class FreeChat {
         ]);
     }
 
+    feedExtraInput(msg) {
+        this.chatProvider.interrupt();
+        this.outputProvider.interrupt();
+        this.chatProvider.feedInput(msg);
+        this.onUser(msg);
+    }
+
     onUser(msg) { }
     onAssistant(msg) { }
 }

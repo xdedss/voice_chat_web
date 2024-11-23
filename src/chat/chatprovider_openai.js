@@ -14,6 +14,7 @@ function findStreamSplit(existingString, start_i) {
                 case '。':
                 case '！':
                 case '？':
+                case '，':
                     return i + 1;
             }
         }
