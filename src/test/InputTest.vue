@@ -1,7 +1,7 @@
 <script setup>
 import { NCard, NButton, NText, NSelect, NList, NListItem, NFlex } from 'naive-ui';
 import { ref } from 'vue';
-import { guid } from '@/utils';
+import { guid, sleep } from '@/utils';
 import InputProviderTencent from '@/input/inputprovider_tencent';
 
 const params = {
@@ -21,12 +21,14 @@ const params = {
     // filter_punc: 0,
     // convert_num_mode : 1,
     // word_info: 2
+    webrecorder_use_legacy_worklet: true,
 };
 const inputProvider = new InputProviderTencent(params);
 const textIdentified = ref([]);
 const audioDevices = ref([]);
 const selectedDeviceId = ref('default');
 const btnState = ref(0);
+// const volumeStr = ref('');
 
 inputProvider.onSentencePartialComplete = text => {
     textIdentified.value[textIdentified.value.length - 1].text = text;
@@ -54,7 +56,7 @@ async function refreshDevices() {
             if (device.kind === "audioinput") {
                 const option = {};
                 option.value = device.deviceId;
-                option.label = device.label || `Microphone ${devices.value.length + 1}`;
+                option.label = device.label || `Microphone ${audioDevices.value.length + 1}`;
                 audioDevices.value.push(option);
             }
         });
@@ -84,6 +86,13 @@ function clear() {
     textIdentified.value = [];
 }
 
+// (async function () {
+//     while (true) {
+//         await sleep(100);
+//         volumeStr.value = inputProvider.recorder.getVolume();
+//     }
+// })();
+
 </script>
 
 <template>
@@ -97,6 +106,7 @@ function clear() {
                 <n-select v-model:value="selectedDeviceId" :options="audioDevices" />
             </n-flex>
             <n-flex vertical>
+                <!-- <n-text>{{ volumeStr }}</n-text> -->
                 <n-text>Results:</n-text>
                 <n-list hoverable clickable>
                     <n-list-item v-for="t in textIdentified" :key="t.key">

@@ -43,6 +43,11 @@ export default class InputProviderTencent {
             },
             // optional
             {
+                id: 'webrecorder_use_legacy_worklet',
+                type: PARAM_TYPES.BOOL,
+                required: false,
+            },
+            {
                 id: 'tencent_asr_voice_format',
                 type: PARAM_TYPES.INT,
                 required: false,
@@ -95,6 +100,7 @@ export default class InputProviderTencent {
             name = removePrefix(name, 'tencent_');
             return name;
         });
+        const useLegacyWorklet = pop_dict(this.params, 'webrecorder_use_legacy_worklet');
         
         this.recorder = null;
         this.speechRecognizer = null;
@@ -120,7 +126,7 @@ export default class InputProviderTencent {
 
         // setup modules and callbacks
         // note: this is just a unique id for logging
-        this.recorder = new WebRecorder(this.requestId, this.logEnabled);
+        this.recorder = new WebRecorder(this.requestId, this.logEnabled, useLegacyWorklet);
         this.speechRecognizer = new SpeechRecognizer(this.params, this.requestId, this.logEnabled);
         this.recorder.OnReceivedData = (data) => {
             // console.log('sendToRecognizer', this.isRecognizerRunning);

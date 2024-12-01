@@ -45,9 +45,9 @@ class MyProcessor extends AudioWorkletProcessor {
     // 去处理音频数据
     // eslint-disable-next-line no-undef
     if (inputs[0][0]) {
-      const output = ${to16kHz}(inputs[0][0], sampleRate);
+      const output = (${to16kHz})(inputs[0][0], sampleRate);
       this.sampleCount += 1;
-      const audioData = ${to16BitPCM}(output);
+      const audioData = (${to16BitPCM})(output);
       this.bitCount += 1;
       const data = [...new Int8Array(audioData.buffer)];
       this.audioData = this.audioData.concat(data);
@@ -74,7 +74,7 @@ navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia
 
 
 export default class WebRecorder {
-    constructor(requestId, isLog) {
+    constructor(requestId, isLog, useLegacyWorklet) {
         this.audioData = [];
         this.allAudioData = [];
         this.stream = null;
@@ -86,6 +86,9 @@ export default class WebRecorder {
         this.bitCount = 0;
         this.mediaStreamSource = null;
         this.isLog = isLog;
+        this.useLegacyWorklet = useLegacyWorklet;
+
+        this.isLog && console.log('[webrecorder]: initialized with useLegacyWorklet = ', useLegacyWorklet);
     }
     static isSupportMediaDevicesMedia() {
         return !!(navigator.getUserMedia || (navigator.mediaDevices && navigator.mediaDevices.getUserMedia));
@@ -139,8 +142,17 @@ export default class WebRecorder {
         }
         this.audioContext && this.audioContext.suspend();
         this.destroyStream();
-        this.isLog && console.log(this.requestId, `webRecorder stop ${this.sampleCount}/${this.bitCount}/${this.getDataCount}`, JSON.stringify(this.frameTime), TAG);
+        this.isLog && console.log(this.requestId, `[webRecorder] stop ${this.sampleCount}/${this.bitCount}/${this.getDataCount}`, TAG);
+        this.isLog && console.log(this.frameTime);
         this.OnStop(this.allAudioData);
+    }
+    getVolume() {
+        if (this.analyser) {
+            const dataArray = new Uint8Array(this.analyser.fftSize);
+            this.analyser.getByteFrequencyData(dataArray);
+            const volume = Math.max(...dataArray);
+            return volume;
+        }
     }
     destroyStream() {
         // 关闭通道
@@ -160,10 +172,13 @@ export default class WebRecorder {
         // // for DEBUG
         // let devices = await WebRecorder.getDevices();
         // deviceId = devices[7].deviceId;
-        console.log('using deviceId = ' + deviceId);
+        console.log('[webRecorder] using deviceId = ' + deviceId);
         if (deviceId) {
             mediaOption.audio = {
-                deviceId: { exact: deviceId }
+                // deviceId: { exact: deviceId },
+                deviceId: deviceId,
+                echoCancellation: {exact: true},
+                noiseSuppression: false,
             };
         }
         // 获取用户的麦克风
@@ -214,10 +229,18 @@ export default class WebRecorder {
         const mediaStream = new MediaStream();
         mediaStream.addTrack(this.audioTrack);
         this.mediaStreamSource = this.audioContext.createMediaStreamSource(mediaStream);
+        
+        // this.analyser = this.audioContext.createAnalyser();
+        // this.analyser.fftSize = 1024 * 4;
+        // this.analyser.smoothingTimeConstant = 0.5;
+        // this.mediaStreamSource.connect(this.analyser);
+
         if (WebRecorder.isSupportMediaStreamSource(requestId, this.audioContext)) {
-            if (WebRecorder.isSupportAudioWorklet(this.audioContext)) { // 不支持 AudioWorklet 降级
+            if (WebRecorder.isSupportAudioWorklet(this.audioContext) && !this.useLegacyWorklet) { // 不支持 AudioWorklet 降级
+                console.log('[webrecorder] audioWorkletNodeDealAudioData')
                 this.audioWorkletNodeDealAudioData(this.mediaStreamSource, requestId);
             } else {
+                console.log('[webrecorder] scriptNodeDealAudioData')
                 this.scriptNodeDealAudioData(this.mediaStreamSource, requestId);
             }
         } else { // 不支持 MediaStreamSource
@@ -267,8 +290,10 @@ export default class WebRecorder {
             const audioWorkletBlobURL = window.URL.createObjectURL(new Blob([audioWorkletCode], { type: 'text/javascript' }));
             await this.audioContext.audioWorklet.addModule(audioWorkletBlobURL);
             const myNode = new AudioWorkletNode(this.audioContext, 'my-processor', { numberOfInputs: 1, numberOfOutputs: 1, channelCount: 1 });
+            let numNewData = 0; // we should downgrade if there is no new data
             myNode.onprocessorerror = (event) => {
                 // 降级
+                console.error('onprocessorerror', event);
                 this.scriptNodeDealAudioData(mediaStreamSource, this.requestId);
                 return false;
             }
@@ -278,14 +303,36 @@ export default class WebRecorder {
                 this.frameCount += 1;
                 this.allAudioData.push(...event.data.audioData);
                 this.sampleCount = event.data.sampleCount;
-                this.bitCount = event.data.bitCount;
+                this.bitCount = event.data.bitCount; 
+                numNewData += 1;
             };
             myNode.port.onmessageerror = (event) => {
                 // 降级
+                console.error('onmessageerror', event);
                 this.scriptNodeDealAudioData(mediaStreamSource, requestId);
                 return false;
             }
             mediaStreamSource && mediaStreamSource.connect(myNode).connect(this.audioContext.destination);
+
+            // // watchdog
+            // window.setTimeout(() => {
+            //     console.log('[webrecorder] messages after 1s: ', numNewData);
+            //     if (numNewData < 2) {
+            //         // must be something wrong
+            //         // 降级
+            //         console.error('[webrecorder] downgrade');
+            //         // must recreate mediaStream and
+            //         myNode.disconnect();
+            //         if (this.mediaStreamSource) {
+            //             this.mediaStreamSource.disconnect();
+            //             this.mediaStreamSource = null;
+            //         }
+            //         const mediaStream = new MediaStream();
+            //         mediaStream.addTrack(this.audioTrack);
+            //         this.mediaStreamSource = this.audioContext.createMediaStreamSource(mediaStream);
+            //         this.scriptNodeDealAudioData(mediaStreamSource, requestId);
+            //     }
+            // }, 1000);
         } catch (e) {
             this.isLog && console.log(this.requestId, 'audioWorkletNodeDealAudioData catch error', JSON.stringify(e), TAG);
             this.OnError(e);

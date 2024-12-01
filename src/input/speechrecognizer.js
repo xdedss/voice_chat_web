@@ -226,7 +226,7 @@ export class SpeechRecognizer {
         this.socket.onclose = (event) => {
             
             // normal stop or error stop
-            this.isLog && console.log('mark recognizer stopped');
+            this.isLog && console.log('[SpeechRecognizer] mark recognizer stopped');
             this.stopPromiseResolve && this.stopPromiseResolve();
 
             try {

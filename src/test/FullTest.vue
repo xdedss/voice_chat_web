@@ -20,6 +20,7 @@ const params = {
     // voice_format : 1,
     // hotword_id : '08003a00000000000000000000000000',
     tencent_asr_needvad: 1,
+    webrecorder_use_legacy_worklet: true,
 };
 
 const chat = new FreeChat(params);
