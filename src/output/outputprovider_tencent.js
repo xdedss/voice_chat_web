@@ -1,3 +1,4 @@
+import { registerOutputProvider } from '@/registry';
 import '../lib/cryptojs';
 import { extractStandardParams, guid, mapParamNames, PARAM_TYPES, removePrefix, pop_dict, sleep } from "../utils.js";
 import { OpusDecoder } from 'opus-decoder';
@@ -60,6 +61,7 @@ async function createQuery(params, text) {
     convertedParams['Speed'] = params.speed || 0;
     convertedParams['SampleRate'] = params.sample_rate || 16000;
     convertedParams['EnableSubtitle'] = true;
+    convertedParams['EmotionCategory'] = 'sajiao';
 
     return convertedParams;
 }
@@ -466,4 +468,4 @@ export default class OutputProviderTencent {
     OnError(e) { }
 };
 
-
+registerOutputProvider(OutputProviderTencent);

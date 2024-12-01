@@ -2,6 +2,7 @@
 import OpenAI from "openai/index";
 import { sleep } from "@/utils";
 import { PARAM_TYPES, extractStandardParams } from "@/utils";
+import { registerChatProvider } from "@/registry";
 
 function findStreamSplit(existingString, start_i) {
     // find a proper position to split.
@@ -13,6 +14,7 @@ function findStreamSplit(existingString, start_i) {
                 case '\n':
                 case '。':
                 case '！':
+                case '!':
                 case '？':
                 case '，':
                     return i + 1;
@@ -86,11 +88,11 @@ export default class ChatProviderOpenai {
     // 暂停识别，关闭连接
     async stop() {
         this.logEnabled && console.log('[ChatProvider] stop called');
-        this.isRunning = false; // tell the worker to stop;
+        this.isStreamingResponse = false; // tell the worker to stop;
         let rejectFunc = this.stopPromiseReject;
         setTimeout(() => rejectFunc && rejectFunc('[ChatProvider] wait for stop: timed out'), 5000);
         await this.stopPromise;
-        this.isStreamingResponse = false;
+        this.isRunning = false;
 
     }
     // 
@@ -220,3 +222,5 @@ export default class ChatProviderOpenai {
     onChatResponse(msg) { }
     onError(e) { }
 }
+
+registerChatProvider(ChatProviderOpenai);

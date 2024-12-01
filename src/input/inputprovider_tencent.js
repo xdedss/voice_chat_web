@@ -1,6 +1,7 @@
 import WebRecorder from "./webrecorder.js";
 import { SpeechRecognizer } from "./speechrecognizer.js";
 import { extractStandardParams, guid, mapParamNames, PARAM_TYPES, removePrefix, pop_dict } from "../utils.js";
+import { registerInputProvider } from "@/registry.js";
 
 // https://cloud.tencent.com/document/product/1093/48982
 
@@ -101,11 +102,11 @@ export default class InputProviderTencent {
             return name;
         });
         const useLegacyWorklet = pop_dict(this.params, 'webrecorder_use_legacy_worklet');
-        
+
         this.recorder = null;
         this.speechRecognizer = null;
         this.deviceId = 'default';
-        
+
         // settings
         // ends ASR a sentence after this many miliseconds of slience
         this.splitRecognitionThreshold = 1000;
@@ -171,7 +172,7 @@ export default class InputProviderTencent {
                 }
                 // start timeout when valid string is received
                 this.timeSinceLastRecognition = 0;
-                
+
                 this.logEnabled && console.log('[InputProvider] onSentencePartialComplete ' + res.result.voice_text_str);
                 this.onSentencePartialComplete(res.result.voice_text_str);
             }
@@ -273,3 +274,5 @@ export default class InputProviderTencent {
     // 识别失败
     OnError() { }
 };
+
+registerInputProvider(InputProviderTencent);
